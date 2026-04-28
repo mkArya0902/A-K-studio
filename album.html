@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Digital Album | AK Studio Chapra</title>
+<meta name="description" content="Your private digital album by AK Studio Chapra. Premium photo gallery for clients."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --gold:#c9a84c;--gold-light:#e8c96a;--gold-dark:#9a7a30;
+  --black:#080808;--dark:#111111;--dark2:#1a1a1a;--dark3:#222222;
+  --text:#e8e2d6;--text-muted:#8a8278;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--black);color:var(--text);font-family:'Inter',sans-serif;overflow-x:hidden;min-height:100vh;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:var(--black);}
+::-webkit-scrollbar-thumb{background:var(--gold-dark);border-radius:2px;}
+
+/* ── PASSWORD GATE ── */
+#password-gate{
+  position:fixed;inset:0;background:var(--black);z-index:9999;
+  display:flex;align-items:center;justify-content:center;
+  background-image:radial-gradient(ellipse at 50% 30%,rgba(201,168,76,0.07) 0%,transparent 70%);
+}
+.gate-box{text-align:center;max-width:420px;padding:3rem 2rem;width:90%;}
+.gate-logo{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:600;color:var(--gold);letter-spacing:3px;margin-bottom:0.3rem;}
+.gate-logo span{color:var(--text);font-style:italic;}
+.gate-divider{width:50px;height:1px;background:var(--gold);margin:1.2rem auto;}
+.gate-subtitle{font-size:0.72rem;letter-spacing:4px;text-transform:uppercase;color:var(--text-muted);margin-bottom:2.5rem;}
+.gate-label{display:block;font-size:0.68rem;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:0.7rem;text-align:left;}
+.gate-input-wrap{position:relative;margin-bottom:1.2rem;}
+#pw-input{
+  width:100%;background:var(--dark2);border:1px solid rgba(201,168,76,0.3);
+  color:var(--text);padding:1rem 3rem 1rem 1.2rem;font-family:'Inter',sans-serif;
+  font-size:1rem;outline:none;letter-spacing:3px;transition:border-color 0.3s;
+}
+#pw-input:focus{border-color:var(--gold);}
+.pw-toggle{position:absolute;right:1rem;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1rem;transition:color 0.3s;}
+.pw-toggle:hover{color:var(--gold);}
+#pw-btn{
+  width:100%;background:var(--gold);color:var(--black);border:none;
+  padding:1rem;font-size:0.8rem;letter-spacing:3px;text-transform:uppercase;
+  font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;transition:all 0.3s;
+}
+#pw-btn:hover{background:var(--gold-light);}
+#pw-error{color:#e74c3c;font-size:0.78rem;margin-top:0.8rem;letter-spacing:1px;min-height:1.2rem;opacity:0;transition:opacity 0.3s;}
+#pw-error.show{opacity:1;}
+.gate-hint{margin-top:2rem;font-size:0.72rem;color:var(--text-muted);letter-spacing:1px;}
+.gate-hint a{color:var(--gold);text-decoration:none;}
+
+/* ── MAIN ALBUM ── */
+#album-app{display:none;}
+
+/* NAV */
+.al-nav{
+  position:sticky;top:0;z-index:100;
+  background:rgba(8,8,8,0.92);backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(201,168,76,0.15);
+  padding:1.2rem 5%;display:flex;align-items:center;justify-content:space-between;
+}
+.al-nav-logo{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:600;color:var(--gold);letter-spacing:2px;text-decoration:none;}
+.al-nav-logo span{color:var(--text);font-style:italic;}
+.al-nav-right{display:flex;align-items:center;gap:1.5rem;}
+.al-back{color:var(--text-muted);text-decoration:none;font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;transition:color 0.3s;}
+.al-back:hover{color:var(--gold);}
+.al-logout{background:none;border:1px solid rgba(201,168,76,0.3);color:var(--text-muted);padding:0.4rem 1rem;font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all 0.3s;font-family:'Inter',sans-serif;}
+.al-logout:hover{border-color:var(--gold);color:var(--gold);}
+
+/* HERO BANNER */
+.al-hero{
+  text-align:center;padding:5rem 5% 3rem;
+  background:linear-gradient(to bottom,rgba(201,168,76,0.04) 0%,transparent 100%);
+  border-bottom:1px solid rgba(201,168,76,0.08);
+}
+.al-badge{display:inline-block;border:1px solid var(--gold);color:var(--gold);font-size:0.65rem;letter-spacing:4px;text-transform:uppercase;padding:0.35rem 1rem;margin-bottom:1.2rem;}
+.al-hero h1{font-family:'Cormorant Garamond',serif;font-size:clamp(2.2rem,5vw,4rem);font-weight:300;color:#fff;line-height:1.1;}
+.al-hero h1 em{font-style:italic;color:var(--gold);}
+.al-hero-sub{font-size:0.8rem;letter-spacing:3px;text-transform:uppercase;color:var(--text-muted);margin-top:1rem;}
+.al-divider{width:60px;height:1px;background:var(--gold);margin:1.5rem auto 0;}
+
+/* ALBUM SELECTOR */
+.al-selector{padding:3rem 5% 1rem;text-align:center;}
+.al-selector-label{font-size:0.7rem;letter-spacing:4px;text-transform:uppercase;color:var(--gold);margin-bottom:1.2rem;}
+.al-tabs{display:flex;flex-wrap:wrap;gap:0.8rem;justify-content:center;}
+.al-tab{
+  background:transparent;border:1px solid rgba(201,168,76,0.3);
+  color:var(--text-muted);padding:0.5rem 1.4rem;font-size:0.72rem;
+  letter-spacing:2px;text-transform:uppercase;cursor:pointer;
+  transition:all 0.3s;font-family:'Inter',sans-serif;
+}
+.al-tab.active,.al-tab:hover{background:var(--gold);border-color:var(--gold);color:var(--black);}
+
+/* GALLERY GRID */
+.al-gallery{padding:2rem 5% 6rem;}
+.al-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+}
+.al-item{
+  position:relative;overflow:hidden;aspect-ratio:3/4;cursor:pointer;
+  background:var(--dark2);
+}
+.al-item img{
+  width:100%;height:100%;object-fit:cover;
+  transition:transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94);display:block;
+}
+.al-item:hover img{transform:scale(1.08);}
+.al-item-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(8,8,8,0.75) 0%,rgba(8,8,8,0.1) 60%,transparent 100%);
+  opacity:0;transition:opacity 0.4s;
+  display:flex;align-items:flex-end;padding:1.2rem;
+}
+.al-item:hover .al-item-overlay{opacity:1;}
+.al-item-zoom{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.7);
+  width:44px;height:44px;border:1px solid rgba(255,255,255,0.6);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.1rem;
+  opacity:0;transition:all 0.3s;
+}
+.al-item:hover .al-item-zoom{opacity:1;transform:translate(-50%,-50%) scale(1);}
+.al-item-num{font-size:0.65rem;letter-spacing:2px;color:rgba(255,255,255,0.5);}
+
+/* EMPTY STATE */
+.al-empty{text-align:center;padding:5rem 2rem;color:var(--text-muted);}
+.al-empty-icon{font-size:3rem;margin-bottom:1rem;opacity:0.4;}
+.al-empty p{font-size:0.85rem;letter-spacing:1px;line-height:1.8;}
+.al-empty code{color:var(--gold);font-size:0.8rem;background:var(--dark2);padding:0.2rem 0.6rem;border-radius:2px;}
+
+/* LOADING */
+.al-loading{text-align:center;padding:4rem;color:var(--text-muted);font-size:0.8rem;letter-spacing:2px;}
+.al-loading-dot{display:inline-block;width:8px;height:8px;background:var(--gold);border-radius:50%;margin:0 3px;animation:ldot 1.2s infinite ease-in-out;}
+.al-loading-dot:nth-child(2){animation-delay:0.2s;}
+.al-loading-dot:nth-child(3){animation-delay:0.4s;}
+@keyframes ldot{0%,80%,100%{transform:scale(0.5);opacity:0.4;}40%{transform:scale(1);opacity:1;}}
+
+/* ── LIGHTBOX ── */
+#lightbox{
+  position:fixed;inset:0;z-index:9000;
+  background:rgba(0,0,0,0.96);
+  display:none;align-items:center;justify-content:center;
+  opacity:0;transition:opacity 0.3s;
+}
+#lightbox.open{display:flex;opacity:1;}
+.lb-inner{position:relative;max-width:92vw;max-height:92vh;display:flex;align-items:center;justify-content:center;}
+#lb-img{
+  max-width:90vw;max-height:88vh;
+  object-fit:contain;border:1px solid rgba(201,168,76,0.2);
+  box-shadow:0 30px 80px rgba(0,0,0,0.8);
+  animation:lbZoom 0.3s ease;
+}
+@keyframes lbZoom{from{transform:scale(0.92);opacity:0;}to{transform:scale(1);opacity:1;}}
+.lb-close{
+  position:fixed;top:1.5rem;right:1.5rem;
+  width:44px;height:44px;border:1px solid rgba(255,255,255,0.2);
+  border-radius:50%;background:rgba(0,0,0,0.6);
+  color:#fff;font-size:1.2rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.3s;z-index:9001;
+}
+.lb-close:hover{background:var(--gold);border-color:var(--gold);color:var(--black);}
+.lb-nav{
+  position:fixed;top:50%;transform:translateY(-50%);
+  width:48px;height:48px;border:1px solid rgba(255,255,255,0.15);
+  background:rgba(0,0,0,0.5);color:#fff;font-size:1.3rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:all 0.3s;z-index:9001;
+}
+.lb-nav:hover{background:var(--gold);border-color:var(--gold);color:var(--black);}
+.lb-prev{left:1rem;}
+.lb-next{right:1rem;}
+.lb-counter{
+  position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);
+  font-size:0.72rem;letter-spacing:3px;color:rgba(255,255,255,0.4);
+  background:rgba(0,0,0,0.6);padding:0.3rem 1rem;border-radius:20px;z-index:9001;
+}
+.lb-download{
+  position:fixed;bottom:1.5rem;right:1.5rem;
+  background:rgba(0,0,0,0.6);border:1px solid rgba(201,168,76,0.3);
+  color:var(--gold);padding:0.5rem 1rem;font-size:0.7rem;letter-spacing:2px;
+  text-transform:uppercase;cursor:pointer;text-decoration:none;
+  transition:all 0.3s;z-index:9001;display:flex;align-items:center;gap:0.5rem;
+}
+.lb-download:hover{background:var(--gold);color:var(--black);border-color:var(--gold);}
+
+/* FOOTER */
+.al-footer{
+  text-align:center;padding:2rem 5%;
+  border-top:1px solid rgba(201,168,76,0.1);
+  background:var(--black);
+}
+.al-footer p{font-size:0.75rem;color:var(--text-muted);}
+.al-footer a{color:var(--gold);text-decoration:none;}
+.al-footer a:hover{color:var(--gold-light);}
+
+/* RESPONSIVE */
+@media(max-width:900px){.al-grid{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:600px){
+  .al-grid{grid-template-columns:repeat(2,1fr);}
+  .al-hero{padding:3.5rem 5% 2rem;}
+  .lb-nav{display:none;}
+}
+@media(max-width:400px){.al-grid{grid-template-columns:1fr 1fr;gap:4px;}}
+</style>
+</head>
+<body>
+
+<!-- PASSWORD GATE -->
+<div id="password-gate">
+  <div class="gate-box">
+    <div class="gate-logo">AK <span>Studio</span></div>
+    <div class="gate-divider"></div>
+    <p class="gate-subtitle">Private Client Album</p>
+    <label class="gate-label" for="pw-input">Enter Your Album Password</label>
+    <div class="gate-input-wrap">
+      <input type="password" id="pw-input" placeholder="••••••••" autocomplete="off"/>
+      <button class="pw-toggle" id="pw-toggle" aria-label="Show password">👁</button>
+    </div>
+    <button id="pw-btn">View My Album</button>
+    <p id="pw-error">Incorrect password. Please try again.</p>
+    <p class="gate-hint">Need help? <a href="https://wa.me/919097027756?text=Hi%20I%20need%20my%20album%20password" target="_blank">WhatsApp us</a></p>
+  </div>
+</div>
+
+<!-- MAIN ALBUM APP -->
+<div id="album-app">
+
+  <!-- NAV -->
+  <nav class="al-nav">
+    <a href="index.html" class="al-nav-logo">AK <span>Studio</span></a>
+    <div class="al-nav-right">
+      <a href="index.html" class="al-back">← Back to Website</a>
+      <button class="al-logout" id="al-logout">Logout</button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <div class="al-hero">
+    <div class="al-badge">Exclusive · Private Gallery</div>
+    <h1>Your <em>Digital Album</em></h1>
+    <p class="al-hero-sub">Captured by AK Studio Chapra &nbsp;✦&nbsp; Chapra, Bihar</p>
+    <div class="al-divider"></div>
+  </div>
+
+  <!-- ALBUM SELECTOR -->
+  <div class="al-selector">
+    <p class="al-selector-label">Select Album</p>
+    <div class="al-tabs" id="al-tabs"><!-- dynamically populated --></div>
+  </div>
+
+  <!-- GALLERY -->
+  <div class="al-gallery">
+    <div class="al-grid" id="al-grid">
+      <div class="al-loading">
+        <span class="al-loading-dot"></span>
+        <span class="al-loading-dot"></span>
+        <span class="al-loading-dot"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="al-footer">
+    <p>© 2026 AK Studio Chapra &nbsp;|&nbsp; Made by <a href="https://www.instagram.com/codewithdr" target="_blank" rel="noopener">Dr. Physio</a></p>
+  </footer>
+</div>
+
+<!-- LIGHTBOX -->
+<div id="lightbox">
+  <button class="lb-close" id="lb-close" aria-label="Close">✕</button>
+  <button class="lb-nav lb-prev" id="lb-prev" aria-label="Previous">‹</button>
+  <div class="lb-inner">
+    <img src="" id="lb-img" alt="Full size photo"/>
+  </div>
+  <button class="lb-nav lb-next" id="lb-next" aria-label="Next">›</button>
+  <div class="lb-counter" id="lb-counter">1 / 1</div>
+  <a href="#" id="lb-download" class="lb-download" download>
+    ↓ Download
+  </a>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// ALBUM CONFIG
+// To add a new album: add its folder name to this array
+// Put photos inside  /albums/<folder-name>/
+// Supported formats: jpg, jpeg, png, webp
+// ─────────────────────────────────────────────
+const ALBUMS = [
+  {
+    id: 'sample-album',
+    label: 'Sample Album',
+    folder: 'albums/sample-album',
+    // List your image filenames here for each album
+    images: [
+      'photo1.jpg','photo2.jpg','photo3.jpg','photo4.jpg',
+      'photo5.jpg','photo6.jpg','photo7.jpg','photo8.jpg'
+    ]
+  },
+  // ── ADD MORE ALBUMS LIKE THIS ──
+  // {
+  //   id: 'client-name',
+  //   label: 'Client Name — Wedding 2025',
+  //   folder: 'albums/client-name',
+  //   images: ['1.jpg','2.jpg','3.jpg']
+  // },
+];
+
+// ─────────────────────────────────────────────
+// PASSWORD CONFIG  (change this!)
+// ─────────────────────────────────────────────
+const ALBUM_PASSWORD = 'AKStudio@2026';
+
+// ─── SESSION ───
+const SESSION_KEY = 'ak_album_auth';
+function isUnlocked(){ return sessionStorage.getItem(SESSION_KEY) === '1'; }
+function unlock(){ sessionStorage.setItem(SESSION_KEY,'1'); }
+function lock(){ sessionStorage.removeItem(SESSION_KEY); }
+
+// ─── PASSWORD GATE ───
+const gate = document.getElementById('password-gate');
+const app  = document.getElementById('album-app');
+
+function showApp(){
+  gate.style.display = 'none';
+  app.style.display  = 'block';
+  document.body.style.overflow = '';
+  initAlbum();
+}
+
+if(isUnlocked()){ showApp(); }
+
+document.getElementById('pw-btn').addEventListener('click', checkPw);
+document.getElementById('pw-input').addEventListener('keydown', e => { if(e.key==='Enter') checkPw(); });
+
+function checkPw(){
+  const val = document.getElementById('pw-input').value.trim();
+  const err = document.getElementById('pw-error');
+  if(val === ALBUM_PASSWORD){
+    err.classList.remove('show');
+    unlock();
+    gate.style.animation = 'fadeOut 0.4s forwards';
+    setTimeout(showApp, 380);
+  } else {
+    err.classList.add('show');
+    document.getElementById('pw-input').value='';
+    document.getElementById('pw-input').focus();
+    document.getElementById('pw-input').style.borderColor='#e74c3c';
+    setTimeout(()=>document.getElementById('pw-input').style.borderColor='',1500);
+  }
+}
+
+// password toggle show/hide
+document.getElementById('pw-toggle').addEventListener('click',()=>{
+  const inp = document.getElementById('pw-input');
+  inp.type = inp.type==='password' ? 'text' : 'password';
+});
+
+// logout
+document.getElementById('al-logout').addEventListener('click',()=>{
+  lock();
+  app.style.display='none';
+  gate.style.display='flex';
+  gate.style.animation='';
+  document.getElementById('pw-input').value='';
+});
+
+// ─── GALLERY ───
+let currentAlbumIndex = 0;
+let currentImages = [];
+let lightboxIndex  = 0;
+
+function initAlbum(){
+  renderTabs();
+  loadAlbum(0);
+}
+
+function renderTabs(){
+  const tabs = document.getElementById('al-tabs');
+  tabs.innerHTML = '';
+  ALBUMS.forEach((alb,i)=>{
+    const btn = document.createElement('button');
+    btn.className = 'al-tab' + (i===0?' active':'');
+    btn.textContent = alb.label;
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.al-tab').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      loadAlbum(i);
+    });
+    tabs.appendChild(btn);
+  });
+}
+
+function loadAlbum(idx){
+  currentAlbumIndex = idx;
+  const alb = ALBUMS[idx];
+  const grid = document.getElementById('al-grid');
+  grid.innerHTML = '<div class="al-loading"><span class="al-loading-dot"></span><span class="al-loading-dot"></span><span class="al-loading-dot"></span></div>';
+
+  currentImages = alb.images.map(fn => alb.folder + '/' + fn);
+
+  setTimeout(()=>{
+    if(!currentImages.length){
+      grid.innerHTML = `<div class="al-empty" style="grid-column:1/-1">
+        <div class="al-empty-icon">📁</div>
+        <p>No images found.<br>Add photos to <code>${alb.folder}/</code><br>and list filenames in <code>album.html</code></p>
+      </div>`;
+      return;
+    }
+    renderGrid();
+  }, 400);
+}
+
+function renderGrid(){
+  const grid = document.getElementById('al-grid');
+  grid.innerHTML='';
+  currentImages.forEach((src,i)=>{
+    const item = document.createElement('div');
+    item.className='al-item';
+    item.innerHTML=`
+      <img src="${src}" alt="Photo ${i+1}" loading="lazy" onerror="this.parentElement.style.display='none'"/>
+      <div class="al-item-overlay"><span class="al-item-num">${String(i+1).padStart(2,'0')}</span></div>
+      <div class="al-item-zoom">⤢</div>`;
+    item.addEventListener('click',()=>openLightbox(i));
+    grid.appendChild(item);
+
+    // staggered fade-in
+    item.style.opacity='0';item.style.transform='scale(0.95)';
+    item.style.transition=`opacity 0.4s ${i*0.04}s ease, transform 0.4s ${i*0.04}s ease`;
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      item.style.opacity='1';item.style.transform='scale(1)';
+    }));
+  });
+}
+
+// ─── LIGHTBOX ───
+const lightbox = document.getElementById('lightbox');
+const lbImg    = document.getElementById('lb-img');
+const lbCount  = document.getElementById('lb-counter');
+const lbDl     = document.getElementById('lb-download');
+
+function openLightbox(idx){
+  lightboxIndex = idx;
+  updateLightbox();
+  lightbox.style.display='flex';
+  requestAnimationFrame(()=>lightbox.classList.add('open'));
+  document.body.style.overflow='hidden';
+}
+
+function closeLightbox(){
+  lightbox.classList.remove('open');
+  setTimeout(()=>{ lightbox.style.display='none'; document.body.style.overflow=''; },300);
+}
+
+function updateLightbox(){
+  const src = currentImages[lightboxIndex];
+  lbImg.src = src;
+  lbCount.textContent = `${lightboxIndex+1} / ${currentImages.length}`;
+  lbDl.href = src;
+  lbDl.download = src.split('/').pop();
+}
+
+document.getElementById('lb-close').addEventListener('click', closeLightbox);
+document.getElementById('lb-prev').addEventListener('click',()=>{ lightboxIndex=(lightboxIndex-1+currentImages.length)%currentImages.length; updateLightbox(); });
+document.getElementById('lb-next').addEventListener('click',()=>{ lightboxIndex=(lightboxIndex+1)%currentImages.length; updateLightbox(); });
+
+// keyboard nav
+document.addEventListener('keydown',e=>{
+  if(!lightbox.classList.contains('open')) return;
+  if(e.key==='ArrowLeft'){ lightboxIndex=(lightboxIndex-1+currentImages.length)%currentImages.length; updateLightbox(); }
+  if(e.key==='ArrowRight'){ lightboxIndex=(lightboxIndex+1)%currentImages.length; updateLightbox(); }
+  if(e.key==='Escape') closeLightbox();
+});
+
+// click backdrop to close
+lightbox.addEventListener('click',e=>{ if(e.target===lightbox) closeLightbox(); });
+
+// touch/swipe support
+let tsX=0;
+lightbox.addEventListener('touchstart',e=>{tsX=e.touches[0].clientX;},{passive:true});
+lightbox.addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-tsX;
+  if(Math.abs(dx)>50){ dx<0 ? document.getElementById('lb-next').click() : document.getElementById('lb-prev').click(); }
+});
+
+// fade-out keyframe
+const st=document.createElement('style');
+st.textContent='@keyframes fadeOut{to{opacity:0;}}';
+document.head.appendChild(st);
+</script>
+</body>
+</html>
