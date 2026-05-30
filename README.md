@@ -1,5 +1,5 @@
-# A-K-studio
-# 📸 AK Studio Digital Album Website
+# M-K-studio
+# 📸 MK Studio Digital Album Website
 
 This is a premium photography website with a digital album feature.
 
